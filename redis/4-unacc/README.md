@@ -29,3 +29,10 @@ redis-cli -h your-ip
 Use [this script](https://github.com/vulhub/redis-rogue-getshell) to execute arbitrary commands:
 
 ![](1.png)
+```
+
+## Exploit
+
+Use [this script](https://github.com/vulhub/redis-rogue-getshell) to execute arbitrary commands:
+
+![](1.png)
