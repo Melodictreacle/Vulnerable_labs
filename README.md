@@ -1,5 +1,7 @@
 # 🔒 Vulnerable Labs — Security Testing & Exploit Research Platform
 
+[![CI](https://github.com/RiOxFRANKY/Vulnerable_labs/actions/workflows/ci.yml/badge.svg)](https://github.com/RiOxFRANKY/Vulnerable_labs/actions/workflows/ci.yml)
+
 > A comprehensive collection of **20 intentionally vulnerable environments** with Docker-based deployment and ready-to-use Python exploit clients for security research, penetration testing practice, and vulnerability reproduction.
 
 ---
@@ -17,6 +19,7 @@
   - [Database & Cache Vulnerabilities](#database--cache-vulnerabilities)
 - [Detailed Lab Instructions](#-detailed-lab-instructions)
 - [Server Script Verification](#-server-script-verification)
+- [DevOps / CI Pipeline](#-devops--ci-pipeline)
 - [Troubleshooting](#-troubleshooting)
 - [Disclaimer](#%EF%B8%8F-disclaimer)
 
@@ -605,6 +608,41 @@ All `docker-compose.yml` files have been cross-checked for correctness:
 - **Kibana** requires the host kernel parameter `vm.max_map_count=262144`.
 - **Tomcat & Docker** labs require `docker compose build` before `docker compose up -d`.
 - **Confluence & Magento** require manual installation wizards after starting.
+
+---
+
+## 🛠 DevOps / CI Pipeline
+
+A GitHub Actions pipeline ([.github/workflows/ci.yml](.github/workflows/ci.yml))
+runs on every push and pull request to `main`. Because the labs are vulnerable
+**by design**, CI does not scan the lab images for CVEs — it keeps the exploit
+clients and infrastructure files healthy:
+
+| Check | Tool | Purpose |
+|---|---|---|
+| Python lint | `ruff` | Catch real defects in the exploit clients |
+| Python syntax | `py_compile` (3.8 + 3.12) | Every client compiles cleanly |
+| Compose validation | `docker compose config` | All 21 `docker-compose.yml` files are valid |
+| Dockerfile lint | `hadolint` | Custom Dockerfiles have no hard errors |
+| Shell lint | `shellcheck` | Entrypoint / helper scripts are clean |
+| YAML lint | `yamllint` | Repository-owned YAML is well-formed |
+| Secret scan | `gitleaks` | No real secrets committed (demo creds allowlisted) |
+
+Run the same checks locally:
+
+```bash
+make install   # ruff, yamllint, pre-commit + git hooks
+make ci        # run the whole pipeline
+```
+
+Or enable pre-commit hooks so checks run automatically before each commit:
+
+```bash
+pip install pre-commit && pre-commit install
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full breakdown and conventions
+(e.g. why the Jenkins `poc.py` and the pinned vulnerable images are left as-is).
 
 ---
 

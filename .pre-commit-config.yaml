@@ -1,0 +1,40 @@
+# Pre-commit hooks mirror the CI checks so problems are caught before pushing.
+# Install once with:  pip install pre-commit && pre-commit install
+# Run on demand with: pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.(png|jpg|jpeg|gif|ico)$'
+      - id: end-of-file-fixer
+        exclude: '\.(png|jpg|jpeg|gif|ico)$'
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+      - id: check-yaml
+        # Vendored compose files use the obsolete top-level `version:` key; that
+        # parses fine. Only skip files with custom tags if any appear later.
+        args: ["--allow-multiple-documents"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.15
+    hooks:
+      - id: ruff
+        name: ruff (lint exploit clients)
+        args: ["--fix"]
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        name: yamllint (repo-owned YAML)
+        args: ["-c", ".yamllint.yml"]
+        files: '^(\.github/|\.yamllint\.yml$|\.pre-commit-config\.yaml$)'
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+        args: ["--config", ".gitleaks.toml"]

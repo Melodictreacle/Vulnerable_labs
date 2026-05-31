@@ -1,0 +1,25 @@
+# Tooling configuration for the Vulnerable_labs exploit clients.
+# This repository is not a Python package; this file only configures linters
+# so that local runs and CI share identical rules.
+
+[tool.ruff]
+target-version = "py38"
+# The exploit clients (client.py / exploit.py) are first-party Python 3 code.
+# The legacy poc.py below is upstream Python 2 kept verbatim for reference and
+# is intentionally excluded from linting and byte-compilation.
+extend-exclude = [
+    "jenkins/CVE-2018-1000861/poc.py",
+]
+
+[tool.ruff.lint]
+# Pragmatic rule set for security tooling: catch real defects (undefined names,
+# unused imports, syntax errors, f-string mistakes) without reformatting the long
+# payload strings that exploits legitimately contain.
+select = ["E4", "E7", "E9", "F", "W"]
+ignore = [
+    "E741",  # ambiguous variable name (`l`) in an exploit list-comprehension
+]
+
+[tool.ruff.lint.per-file-ignores]
+# PoC scripts mirror upstream advisories; tolerate their import-time side effects.
+"**/poc.py" = ["E402"]

@@ -54,7 +54,7 @@ def check_vulnerability(target):
 
     if status_true is not None and status_false is not None:
         if status_true != status_false:
-            print(f"[+] VULNERABLE! Different responses detected:")
+            print("[+] VULNERABLE! Different responses detected:")
             print(f"    TRUE condition:  HTTP {status_true}")
             print(f"    FALSE condition: HTTP {status_false}")
             return True, status_true

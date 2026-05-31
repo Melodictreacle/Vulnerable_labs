@@ -1,0 +1,21 @@
+# yamllint configuration.
+#
+# Authoritative validation of the vulnerable-lab compose files is done with
+# `docker compose config` (see scripts/validate-compose.sh). yamllint here is
+# scoped to repository-owned YAML (CI workflows, this config, pre-commit) and is
+# deliberately lenient about cosmetics so it never fights vendored upstream files.
+
+extends: relaxed
+
+rules:
+  line-length: disable          # exploit payloads / env values are long by nature
+  new-lines: disable            # line endings are enforced via .gitattributes
+  comments: disable
+  comments-indentation: disable
+  document-start: disable
+  truthy: disable               # compose uses yes/no/on/off freely
+  empty-lines: disable
+  indentation:
+    level: warning
+  trailing-spaces: enable
+  new-line-at-end-of-file: enable

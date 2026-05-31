@@ -1,0 +1,23 @@
+title = "Vulnerable_labs gitleaks configuration"
+
+# Start from gitleaks' built-in rule set (AWS keys, private keys, tokens, ...).
+[extend]
+useDefault = true
+
+# This repository intentionally ships weak/default credentials for the lab
+# environments. The goal of secret scanning here is to stop *real* secrets
+# (a contributor's API key, private SSH key, cloud token) from being committed,
+# not to flag the documented demo passwords.
+[allowlist]
+description = "Intentional default/demo credentials used by the vulnerable labs."
+regexTarget = "match"
+regexes = [
+  '''vulhub123456''',
+  '''(?i)\b(postgres|root|admin123?|hacker123|examplepass|password)\b''',
+]
+# Files that document or configure the labs and necessarily contain demo creds.
+paths = [
+  '''.*docker-compose\.ya?ml''',
+  '''.*README(\.zh-cn)?\.md''',
+  '''phpmyadmin/CVE-2018-12613/config\.inc\.php''',
+]

