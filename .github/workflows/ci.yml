@@ -28,7 +28,7 @@ jobs:
     name: Python lint (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -46,7 +46,7 @@ jobs:
         # The clients target Python 3.6+; verify across the supported range.
         python-version: ["3.8", "3.12"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
@@ -57,7 +57,7 @@ jobs:
     name: Validate docker-compose files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Show docker compose version
         run: docker compose version
       - name: Validate every compose file
@@ -73,7 +73,7 @@ jobs:
           - docker/unauthorized-rce/Dockerfile
           - tomcat/CVE-2017-12615/Dockerfile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Hadolint ${{ matrix.dockerfile }}
         uses: hadolint/hadolint-action@v3.3.0
         with:
@@ -86,7 +86,7 @@ jobs:
     name: Lint shell scripts (shellcheck)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run shellcheck
         # Only repo-owned scripts are linted. docker/unauthorized-rce/docker-entrypoint.sh
         # is upstream Docker-in-Docker boilerplate and is intentionally left as-is.
@@ -100,7 +100,7 @@ jobs:
     name: Lint repo YAML (yamllint)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -114,7 +114,7 @@ jobs:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Run gitleaks
