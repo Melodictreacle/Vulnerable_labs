@@ -36,3 +36,23 @@ Use [this script](https://github.com/vulhub/redis-rogue-getshell) to execute arb
 Use [this script](https://github.com/vulhub/redis-rogue-getshell) to execute arbitrary commands:
 
 ![](1.png)
+
+## Status Checker Client (client2.py)
+
+A benign status checker client is also provided as `client2.py`.
+
+### Description
+Redis Normal User Client
+A benign client to connect to a Redis database using standard socket protocol,
+and retrieve basic status information and set/get test keys.
+
+### Usage
+```bash
+python3 client2.py [--mode {check,active}] [--port PORT] <target>
+```
+
+### Parameters
+* `target`: Target Redis host (IP or hostname)
+* `--port PORT`: Target Redis port (default: `6379`)
+* `--mode {check,active}`: Simulation mode. `check` connects and sends PING/INFO (default); `active` performs standard benign key operations (`SET`, `GET`, `DEL`).
+

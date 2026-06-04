@@ -41,3 +41,21 @@ By changing the OR condition, you can perform SQL boolean-based blind injection.
 Using [this POC](https://github.com/ambionics/magento-exploits), you can read the administrator's session:
 
 ![](4.png)
+
+## Status Checker Client (client2.py)
+
+A benign status checker client is also provided as `client2.py`.
+
+### Description
+Magento Status Checker
+A benign client to connect to a Magento storefront and verify its availability and search Catalog.
+
+### Usage
+```bash
+python3 client2.py [--mode {check,active}] <target>
+```
+
+### Parameters
+* `target`: Target URL, e.g. `http://localhost:8081`
+* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` performs standard catalog search requests.
+

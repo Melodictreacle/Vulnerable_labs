@@ -46,3 +46,21 @@ The successful exploitation can be verified by receiving the reverse shell conne
 ![Reverse Shell Exploitation](1.png)
 
 This vulnerability demonstrates the critical importance of properly securing Docker daemon access and implementing authentication mechanisms for remote API endpoints.
+
+## Status Checker Client (client2.py)
+
+A benign status checker client is also provided as `client2.py`.
+
+### Description
+Docker Status Checker
+A benign client to connect to an exposed Docker daemon API and display version details and simulate container operations.
+
+### Usage
+```bash
+python3 client2.py [--mode {check,active}] <target>
+```
+
+### Parameters
+* `target`: Target URL, e.g. `http://localhost:2375`
+* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` lists active docker containers and images.
+

@@ -57,3 +57,21 @@ Here is [expliot.py](exploit.py)，change `target` to your target site，change 
 Execute to get the shell:
 
 ![](1.png)
+
+## Status Checker Client (client2.py)
+
+A benign status checker client is also provided as `client2.py`.
+
+### Description
+WordPress Normal User Client
+A benign client to verify WordPress site connectivity and retrieve posts/users via REST API.
+
+### Usage
+```bash
+python3 client2.py [--mode {check,active}] <target>
+```
+
+### Parameters
+* `target`: Target URL, e.g. `http://localhost:8081`
+* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` fetches public blog posts and user lists via WordPress REST API.
+

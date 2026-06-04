@@ -40,3 +40,21 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
 `233*233` has been successfully executed:
 
 ![](1.png)
+
+## Status Checker Client (client2.py)
+
+A benign status checker client is also provided as `client2.py`.
+
+### Description
+Struts2 Normal User Client
+A benign client to connect to the Struts2 endpoint using normal HTTP requests and submit benign forms.
+
+### Usage
+```bash
+python3 client2.py [--mode {check,active}] <target>
+```
+
+### Parameters
+* `target`: Target URL, e.g. `http://localhost:8080`
+* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` submits standard benign POST form requests.
+
