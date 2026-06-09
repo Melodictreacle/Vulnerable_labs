@@ -5,10 +5,11 @@
 [tool.ruff]
 target-version = "py38"
 # The exploit clients (client.py / exploit.py) are first-party Python 3 code.
-# The legacy poc.py below is upstream Python 2 kept verbatim for reference and
-# is intentionally excluded from linting and byte-compilation.
+# The legacy poc.py / exp.py below are upstream Python 2 kept verbatim for
+# reference and are intentionally excluded from linting and byte-compilation.
 extend-exclude = [
     "jenkins/CVE-2018-1000861/poc.py",
+    "jenkins/CVE-2018-1000861/exp.py",
 ]
 
 [tool.ruff.lint]
