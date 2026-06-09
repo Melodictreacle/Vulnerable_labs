@@ -64,7 +64,7 @@ A benign status checker client is also provided as `client2.py`.
 
 ### Description
 WordPress Normal User Client
-A benign client to verify WordPress site connectivity and retrieve posts/users via REST API.
+A benign client to verify WordPress site connectivity and browse it like a normal visitor (home page, login page, static assets and RSS feed).
 
 ### Usage
 ```bash
@@ -73,5 +73,5 @@ python3 client2.py [--mode {check,active}] <target>
 
 ### Parameters
 * `target`: Target URL, e.g. `http://localhost:8081`
-* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` fetches public blog posts and user lists via WordPress REST API.
+* `--mode {check,active}`: Simulation mode. `check` requests `GET /` and looks for the WordPress signature (default); `active` browses like a visitor — `GET /wp-login.php`, the jQuery asset `GET /wp-includes/js/jquery/jquery.js`, and the RSS feed `GET /?feed=rss2`.
 

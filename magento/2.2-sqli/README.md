@@ -57,5 +57,5 @@ python3 client2.py [--mode {check,active}] <target>
 
 ### Parameters
 * `target`: Target URL, e.g. `http://localhost:8081`
-* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` performs standard catalog search requests.
+* `--mode {check,active}`: Simulation mode. `check` requests `GET /` to confirm the storefront (default); `active` performs a catalog search via `GET /catalogsearch/result/?q=test`.
 

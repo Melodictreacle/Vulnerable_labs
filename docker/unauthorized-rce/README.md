@@ -62,5 +62,5 @@ python3 client2.py [--mode {check,active}] <target>
 
 ### Parameters
 * `target`: Target URL, e.g. `http://localhost:2375`
-* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` lists active docker containers and images.
+* `--mode {check,active}`: Simulation mode. `check` requests `GET /version` for daemon/API version (default); `active` lists containers (`GET /containers/json?all=1`) and images (`GET /images/json`).
 

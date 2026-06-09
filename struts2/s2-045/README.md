@@ -56,5 +56,5 @@ python3 client2.py [--mode {check,active}] <target>
 
 ### Parameters
 * `target`: Target URL, e.g. `http://localhost:8080`
-* `--mode {check,active}`: Simulation mode. `check` runs a quick status check (default); `active` submits standard benign POST form requests.
+* `--mode {check,active}`: Simulation mode. `check` sends a normal `GET /` and an empty `POST /` (default); `active` submits a benign form via `POST /` with sample `name`/`email`/`message` fields.
 

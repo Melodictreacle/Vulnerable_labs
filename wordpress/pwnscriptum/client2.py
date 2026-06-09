@@ -2,7 +2,8 @@
 """
 WordPress Normal User Client
 ----------------------------
-A benign client to verify WordPress site connectivity and retrieve posts/users via REST API.
+A benign client to verify WordPress site connectivity and browse the site like
+a normal visitor (home page, login page, static assets and RSS feed).
 """
 
 import argparse
@@ -16,20 +17,10 @@ def check_target(target):
     try:
         r = requests.get(f"{target}/", timeout=10, verify=False)
         print(f"[+] Connected to WordPress server (HTTP {r.status_code})")
-
-        # Query public REST API
-        api_url = f"{target}/wp-json/"
-        r_api = requests.get(api_url, timeout=10, verify=False)
-        if r_api.status_code == 200:
-            print("[+] WordPress REST API is active")
-            try:
-                data = r_api.json()
-                name = data.get("name", "WordPress Site")
-                print(f"[+] Site Name: {name}")
-            except ValueError:
-                pass
+        if "wordpress" in r.text.lower() or "wp-content" in r.text.lower():
+            print("[+] WordPress signature detected in response body")
         else:
-            print(f"[*] REST API response status: HTTP {r_api.status_code}")
+            print("[*] Target reachable, but WordPress signature was not found")
         return True
     except requests.exceptions.RequestException as e:
         print(f"[-] Connection failed: {e}")
@@ -38,15 +29,14 @@ def check_target(target):
 
 def simulate_active(target):
     try:
-        r1 = requests.get(f"{target}/wp-json/wp/v2/posts", timeout=10, verify=False)
-        print(f"[+] Fetched blog posts via WordPress REST API (HTTP {r1.status_code})")
-        if r1.status_code == 200:
-            print(f"[+] Found {len(r1.json())} published posts")
+        r1 = requests.get(f"{target}/wp-login.php", timeout=10, verify=False)
+        print(f"[+] Visited login page (HTTP {r1.status_code})")
 
-        r2 = requests.get(f"{target}/wp-json/wp/v2/users", timeout=10, verify=False)
-        print(f"[+] Fetched users list via WordPress REST API (HTTP {r2.status_code})")
-        if r2.status_code == 200:
-            print(f"[+] Found {len(r2.json())} public user accounts")
+        r2 = requests.get(f"{target}/wp-includes/js/jquery/jquery.js", timeout=10, verify=False)
+        print(f"[+] Fetched jQuery static asset (HTTP {r2.status_code})")
+
+        r3 = requests.get(f"{target}/?feed=rss2", timeout=10, verify=False)
+        print(f"[+] Fetched RSS feed (HTTP {r3.status_code})")
     except Exception as e:
         print(f"[-] Active simulation failed: {e}")
 
