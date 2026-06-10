@@ -15,7 +15,7 @@ requests.packages.urllib3.disable_warnings()
 def check_target(target):
     try:
         r = requests.get(f"{target}/", timeout=10, verify=False)
-        print(f"[+] Connected to Magento server (HTTP {r.status_code})")
+        print(f"[+] Connected to Magento server (HTTP {r.status_code})\n[+] Response Body:\n{r.text[:250]}...\n")
         if r.status_code == 200 and "magento" in r.text.lower():
             print("[+] Magento storefront is accessible.")
         return True
@@ -27,11 +27,11 @@ def check_target(target):
 def simulate_active(target):
     try:
         r = requests.get(f"{target}/catalogsearch/result/?q=test", timeout=10, verify=False)
-        print(f"[+] Performed catalog search (HTTP {r.status_code})")
+        print(f"[+] Performed catalog search (HTTP {r.status_code})\n[+] Response Body:\n{r.text[:250]}...\n")
         r_post = requests.post(f"{target}/catalogsearch/result/", data={"q": "test"}, timeout=10, verify=False)
-        print(f"[+] Sent POST catalog search request (HTTP {r_post.status_code})")
+        print(f"[+] Sent POST catalog search request (HTTP {r_post.status_code})\n[+] Response Body:\n{r_post.text[:250]}...\n")
         r_put = requests.put(f"{target}/benign-note.txt", data="benign normal user content", timeout=10, verify=False)
-        print(f"[+] Sent PUT request for a benign text resource (HTTP {r_put.status_code})")
+        print(f"[+] Sent PUT request for a benign text resource (HTTP {r_put.status_code})\n[+] Response Body:\n{r_put.text[:250]}...\n")
     except Exception as e:
         print(f"[-] Active simulation failed: {e}")
 

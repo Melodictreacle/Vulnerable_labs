@@ -16,7 +16,7 @@ def check_target(target):
     try:
         # Send a normal GET request
         r = requests.get(f"{target}/", timeout=10, verify=False)
-        print(f"[+] Connected to Struts2 application (HTTP {r.status_code})")
+        print(f"[+] Connected to Struts2 application (HTTP {r.status_code})\n[+] Response Body:\n{r.text[:250]}...\n")
         # Send a normal POST request
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         r_post = requests.post(f"{target}/", headers=headers, data="", timeout=10, verify=False)
@@ -32,11 +32,11 @@ def simulate_active(target):
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         data = {"name": "testuser", "email": "test@example.com", "message": "hello struts2"}
         r = requests.post(f"{target}/", headers=headers, data=data, timeout=10, verify=False)
-        print(f"[+] Submitted form POST request to main action (HTTP {r.status_code})")
+        print(f"[+] Submitted form POST request to main action (HTTP {r.status_code})\n[+] Response Body:\n{r.text[:250]}...\n")
         r_get = requests.get(f"{target}/", timeout=10, verify=False)
-        print(f"[+] Sent GET request to main action (HTTP {r_get.status_code})")
+        print(f"[+] Sent GET request to main action (HTTP {r_get.status_code})\n[+] Response Body:\n{r_get.text[:250]}...\n")
         r_put = requests.put(f"{target}/benign-note.txt", data="benign normal user content", timeout=10, verify=False)
-        print(f"[+] Sent PUT request for a benign text resource (HTTP {r_put.status_code})")
+        print(f"[+] Sent PUT request for a benign text resource (HTTP {r_put.status_code})\n[+] Response Body:\n{r_put.text[:250]}...\n")
     except Exception as e:
         print(f"[-] Active simulation failed: {e}")
 
