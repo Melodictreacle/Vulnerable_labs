@@ -9,13 +9,31 @@ import argparse
 import sys
 import requests
 
+
+def to_curl(req):
+    if not req:
+        return "No request object"
+    try:
+        command = f"curl -X {req.method}"
+        for k, v in req.headers.items():
+            command += f" -H '{k}: {v}'"
+        if req.body:
+            body = req.body
+            if isinstance(body, bytes):
+                body = body.decode('utf-8', 'ignore')
+            command += f" -d '{body}'"
+        command += f" '{req.url}'"
+        return command
+    except Exception as e:
+        return f"curl command generation failed: {e}"
+
 requests.packages.urllib3.disable_warnings()
 
 
 def check_target(target):
     try:
         r = requests.get(f"{target}/", timeout=10, verify=False)
-        print(f"[+] Connected to Magento server (HTTP {r.status_code})\n[+] Response Body:\n{r.text[:250]}...\n")
+        print(f"[+] Connected to Magento server (HTTP {r.status_code})\n[+] Curl: {to_curl(r.request)}\n[+] Response Body:\n{r.text[:250]}...\n")
         if r.status_code == 200 and "magento" in r.text.lower():
             print("[+] Magento storefront is accessible.")
         return True
@@ -27,11 +45,11 @@ def check_target(target):
 def simulate_active(target):
     try:
         r = requests.get(f"{target}/catalogsearch/result/?q=test", timeout=10, verify=False)
-        print(f"[+] Performed catalog search (HTTP {r.status_code})\n[+] Response Body:\n{r.text[:250]}...\n")
+        print(f"[+] Performed catalog search (HTTP {r.status_code})\n[+] Curl: {to_curl(r.request)}\n[+] Response Body:\n{r.text[:250]}...\n")
         r_post = requests.post(f"{target}/catalogsearch/result/", data={"q": "test"}, timeout=10, verify=False)
-        print(f"[+] Sent POST catalog search request (HTTP {r_post.status_code})\n[+] Response Body:\n{r_post.text[:250]}...\n")
+        print(f"[+] Sent POST catalog search request (HTTP {r_post.status_code})\n[+] Curl: {to_curl(r_post.request)}\n[+] Response Body:\n{r_post.text[:250]}...\n")
         r_put = requests.put(f"{target}/benign-note.txt", data="benign normal user content", timeout=10, verify=False)
-        print(f"[+] Sent PUT request for a benign text resource (HTTP {r_put.status_code})\n[+] Response Body:\n{r_put.text[:250]}...\n")
+        print(f"[+] Sent PUT request for a benign text resource (HTTP {r_put.status_code})\n[+] Curl: {to_curl(r_put.request)}\n[+] Response Body:\n{r_put.text[:250]}...\n")
     except Exception as e:
         print(f"[-] Active simulation failed: {e}")
 
